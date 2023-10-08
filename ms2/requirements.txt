@@ -1,0 +1,5 @@
+distlib==0.3.7
+filelock==3.12.4
+kafka-python==2.0.2
+platformdirs==3.11.0
+virtualenv==20.24.5
