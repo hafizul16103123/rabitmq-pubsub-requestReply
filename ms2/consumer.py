@@ -1,4 +1,6 @@
-import pika ,json
+import pika
+import json
+
 
 class RPCConsumer:
     _instance = None  # Class-level variable to store the singleton instance
@@ -11,15 +13,19 @@ class RPCConsumer:
 
     def initialize(self, host, username, password, queue_name):
         self.credentials = pika.PlainCredentials(username, password)
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host, credentials=self.credentials))
+        self.connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host, credentials=self.credentials))
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue=queue_name)
-        self.channel.basic_consume(queue=queue_name, on_message_callback=self.on_request)
+        self.channel.basic_consume(
+            queue=queue_name, on_message_callback=self.on_request)
         print("Microservice is waiting for requests...")
 
     def on_request(self, ch, method, properties, body):
-        
-        python_dict = json.loads(body)
+
+        body_str = body.decode('utf-8')  # Decode the bytes to a string
+        # Parse the JSON string into a dictionary
+        python_dict = json.loads(body_str)
         result = python_dict['num1'] + python_dict['num2']
         response = f"Response From MS-2: {result}"
         ch.basic_publish(
@@ -37,6 +43,7 @@ class RPCConsumer:
             self.channel.start_consuming()
         except KeyboardInterrupt:
             self.connection.close()
+
 
 # Usage:
 rpc_consumer = RPCConsumer()  # Use default values

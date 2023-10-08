@@ -1,6 +1,7 @@
 import pika
 import uuid
 
+
 class RPCClient:
     _instance = None  # Class-level variable to store the singleton instance
 
@@ -17,7 +18,8 @@ class RPCClient:
         self.password = password if password is not None else 'admin-pass'
 
         self.credentials = pika.PlainCredentials(self.username, self.password)
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, credentials=self.credentials))
+        self.connection = pika.BlockingConnection(
+            pika.ConnectionParameters(self.host, credentials=self.credentials))
 
         self.channel = self.connection.channel()
 
@@ -35,6 +37,7 @@ class RPCClient:
             self.response = body
 
     def call(self, message):
+        print(f"Producer send data: {message}")
         self.response = None
         self.corr_id = str(uuid.uuid4())
         self.channel.basic_publish(
@@ -49,6 +52,7 @@ class RPCClient:
         while self.response is None:
             self.connection.process_data_events()
         return self.response
+
 
 # # Usage:
 # rpc_client = RPCClient()  # Creating an instance directly
